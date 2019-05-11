@@ -1,43 +1,27 @@
 pipeline {
     agent any
-    stages {
-        stage('Build') {
-            steps {
-                sh 'mvn clean package'
-            }
-            post {
-                success {
-                    echo 'Now Archiving...'
-                    archiveArtifacts artifacts: '**/target/*.war'
+
+    parameters {
+        string(name: "tomcat_dev", defaultValue: '34.251.0.180', description: 'Staging env')
+        string(name: "tomcat_prod", defaultValue: '63.35.237.65', description: 'Prod env')
+
+    }
+
+    triggers {
+        pollSCM('* * * * *') // not a realistic example
+    }
+
+    stage ('Deployments') {
+        parallel {
+            stage ('Deploy to Staging') {
+                steps {
+                    sh "scp -i /var/lib/docker/volumes/jenkins_home/_data/asw.pem **/target/*.war ec2-user@{params.tomcat_dev}:/var/lib/tomcat7/webapps"
                 }
             }
-        }
 
-        stage ('Deploy to staging') {
-            steps {
-                build job: 'Deploy to staging'
-            }
-        }
-
-        
-        stage ('Deploy to production') {
-            steps {
-                // will fail if no approved within 5 days
-                timeout(time:5, unit:'DAYS') {
-                    // can have a submitter argument
-                    input message: 'Approve PRODUCTION Deplyment'
-                }
-
-                build job: 'deploy to prod'
-            }
-
-            post {
-                success {
-                    echo 'Code deployed to Production'
-                }
-
-                failure {
-                    echo 'Deplyment failed.'
+            stage ('Deploy to Production') {
+                steps {
+                    sh "scp -i /var/lib/docker/volumes/jenkins_home/_data/asw.pem **/target/*.war ec2-user@{params.tomcat_prod}:/var/lib/tomcat7/webapps"
                 }
             }
         }
