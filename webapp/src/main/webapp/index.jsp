@@ -1,1 +1,1 @@
-Hello, World! Version 2019/05/11 17:29
+Hello, World! Version sudo usermod -a -G tomcat ec2-user
