@@ -16,6 +16,7 @@ pipeline {
         stage ('Build') {
             steps {
                 sh 'mvn clean package'
+                sh "docker build -f Staging/Dockerfile -t tomcat-8090:${env.BUILD_ID}"
             }
 
             post {
