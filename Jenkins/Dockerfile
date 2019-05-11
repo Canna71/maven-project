@@ -12,6 +12,8 @@ RUN apt-get update  -qq \
     && apt-get install docker-ce=17.12.1~ce-0~debian -y
 RUN usermod -aG docker jenkins
 
+RUN apt-get install -y maven
+
 
 #docker image build -t jenkins-docker .
 #docker container run -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock jenkins-docker
